@@ -19,11 +19,15 @@ const maxRows = 1000
 var forbidden = regexp.MustCompile(`\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|CREATE|MERGE|GRANT|REVOKE|CALL|COPY)\b`)
 
 func main() {
-	if len(os.Args) == 2 && os.Args[1] == "ax-tools" {
+	args := os.Args[1:]
+	if len(args) > 0 && args[0] == "--" {
+		args = args[1:]
+	}
+	if len(args) == 1 && args[0] == "ax-tools" {
 		fmt.Println(`{"name":"postgres_query","description":"Run a read-only PostgreSQL query","parameters":{"type":"object","properties":{"sql":{"type":"string","description":"SELECT or WITH query"}},"required":["sql"]}}`)
 		return
 	}
-	if len(os.Args) != 3 || os.Args[1] != "ax-run" || os.Args[2] != "postgres_query" {
+	if len(args) != 2 || args[0] != "ax-run" || args[1] != "postgres_query" {
 		fmt.Fprintln(os.Stderr, "usage: pgx ax-tools | pgx ax-run postgres_query")
 		os.Exit(2)
 	}
