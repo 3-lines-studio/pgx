@@ -20,8 +20,8 @@ The legacy `ALFRED_PICSEL_DATABASE_URL` name remains supported during migration.
 ## Protocol
 
 ```sh
-pgx ax-tools
-printf '{"sql":"SELECT 1"}' | pgx ax-run postgres_query
+pgx describe
+printf '{"sql":"SELECT 1"}' | pgx run postgres_query
 ```
 
 Every query runs in a PostgreSQL read-only transaction. Results stop at 1,000 rows.

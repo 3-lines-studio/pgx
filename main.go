@@ -23,12 +23,12 @@ func main() {
 	if len(args) > 0 && args[0] == "--" {
 		args = args[1:]
 	}
-	if len(args) == 1 && args[0] == "ax-tools" {
+	if len(args) == 1 && args[0] == "describe" {
 		fmt.Println(`{"name":"postgres_query","description":"Run a read-only PostgreSQL query","parameters":{"type":"object","properties":{"sql":{"type":"string","description":"SELECT or WITH query"}},"required":["sql"]}}`)
 		return
 	}
-	if len(args) != 2 || args[0] != "ax-run" || args[1] != "postgres_query" {
-		fmt.Fprintln(os.Stderr, "usage: pgx ax-tools | pgx ax-run postgres_query")
+	if len(args) != 2 || args[0] != "run" || args[1] != "postgres_query" {
+		fmt.Fprintln(os.Stderr, "usage: pgx describe | pgx run postgres_query")
 		os.Exit(2)
 	}
 	var input struct {
