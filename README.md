@@ -1,5 +1,7 @@
 # pgx
 
+<p align="center"><img src=".github/ax.svg" width="96" height="96" alt="AX ecosystem"></p>
+
 Read-only PostgreSQL tool for AX.
 
 ## Install
