@@ -365,32 +365,40 @@ func TestQueryLiveDB(t *testing.T) {
 	if err != nil {
 		t.Fatalf("simple query: %v", err)
 	}
-	if out != `[{"one":1}]` {
-		t.Fatalf("simple query output %q, want [{\"one\":1}]", out)
+	var parsed struct {
+		Rows      []map[string]any `json:"rows"`
+		Truncated bool             `json:"truncated"`
+	}
+	if err := json.Unmarshal([]byte(out), &parsed); err != nil {
+		t.Fatalf("simple query output %q not JSON object: %v", out, err)
+	}
+	if parsed.Truncated || len(parsed.Rows) != 1 || parsed.Rows[0]["one"] != float64(1) {
+		t.Fatalf("simple query output %q", out)
 	}
 
 	out, err = query(ctx, url, "SELECT 1 AS one WHERE false")
 	if err != nil {
 		t.Fatalf("empty query: %v", err)
 	}
-	if out != "[]" {
-		t.Fatalf("empty result output %q, want []", out)
+	if err := json.Unmarshal([]byte(out), &parsed); err != nil {
+		t.Fatalf("empty query output %q not JSON object: %v", out, err)
+	}
+	if parsed.Truncated || len(parsed.Rows) != 0 {
+		t.Fatalf("empty result output %q", out)
 	}
 
 	out, err = query(ctx, url, "SELECT g AS n FROM generate_series(1, 2000) g")
 	if err != nil {
 		t.Fatalf("truncation query: %v", err)
 	}
-	if !strings.HasSuffix(out, "\nResults truncated at 1000 rows.") {
-		t.Fatalf("output %q missing truncation note", out)
+	if err := json.Unmarshal([]byte(out), &parsed); err != nil {
+		t.Fatalf("truncated output %q not JSON object: %v", out, err)
 	}
-	parts := strings.SplitN(out, "\nResults truncated", 2)
-	var arr []map[string]any
-	if err := json.Unmarshal([]byte(parts[0]), &arr); err != nil {
-		t.Fatalf("truncated output %q not JSON: %v", parts[0], err)
+	if !parsed.Truncated {
+		t.Fatalf("expected truncation flag: %q", out)
 	}
-	if len(arr) != 1000 {
-		t.Fatalf("truncated rows = %d, want 1000", len(arr))
+	if len(parsed.Rows) != 1000 {
+		t.Fatalf("truncated rows = %d, want 1000", len(parsed.Rows))
 	}
 
 	_, err = query(ctx, url, "CREATE TABLE t (id int)")

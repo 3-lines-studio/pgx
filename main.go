@@ -93,15 +93,11 @@ func query(ctx context.Context, databaseURL, sql string) (string, error) {
 	if err := rows.Err(); err != nil {
 		return "", fmt.Errorf("read rows: %w", err)
 	}
-	data, err := json.Marshal(result)
+	payload, err := json.Marshal(map[string]any{"rows": result, "truncated": truncated})
 	if err != nil {
 		return "", fmt.Errorf("encode result: %w", err)
 	}
-	output := string(data)
-	if truncated {
-		output += "\nResults truncated at 1000 rows."
-	}
-	return output, nil
+	return string(payload), nil
 }
 
 func validateReadOnly(sql string) error {
