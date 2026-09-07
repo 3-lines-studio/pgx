@@ -61,12 +61,12 @@ func query(ctx context.Context, databaseURL, sql string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("connect: %w", err)
 	}
-	defer conn.Close(ctx)
+	defer func() { _ = conn.Close(ctx) }()
 	tx, err := conn.BeginTx(ctx, pgx.TxOptions{AccessMode: pgx.ReadOnly})
 	if err != nil {
 		return "", fmt.Errorf("begin read-only transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	rows, err := tx.Query(ctx, sql)
 	if err != nil {
 		return "", fmt.Errorf("query: %w", err)
